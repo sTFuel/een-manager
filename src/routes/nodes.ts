@@ -65,7 +65,7 @@ router.get('/:id/status', async (req: Request, res: Response) => {
     res.json({
       container: {
         id: containerStatus.id,
-        name: getContainerName(nodeName),
+        name: node.containerName || getContainerName(nodeName),
         status: containerStatus.running ? 'running' : 'stopped',
         ports: containerStatus.port ? { '17888': containerStatus.port.toString() } : {},
       },
@@ -128,7 +128,8 @@ router.post('/new', async (req: Request, res: Response) => {
     // Start the container (it will generate its own keystore on first run)
     try {
       const containerId = await startContainer(body.name, node.port);
-      await updateNode(body.name, { containerId, status: 'running' });
+      const containerName = getContainerName(body.name);
+      await updateNode(body.name, { containerId, containerName, status: 'running' });
     } catch (error: any) {
       // Rollback: delete node metadata if container creation fails
       await deleteNode(body.name);
@@ -181,7 +182,8 @@ router.post('/new-with-keystore', async (req: Request, res: Response) => {
     // Start the container
     try {
       const containerId = await startContainer(body.name, node.port);
-      await updateNode(body.name, { containerId, status: 'running' });
+      const containerName = getContainerName(body.name);
+      await updateNode(body.name, { containerId, containerName, status: 'running' });
     } catch (error: any) {
       // Rollback: delete node metadata if container creation fails
       await deleteNode(body.name);
@@ -219,7 +221,8 @@ router.post('/:id/start', async (req: Request, res: Response) => {
     }
 
     const containerId = await startContainer(nodeName, node.port);
-    await updateNode(nodeName, { containerId, status: 'running' });
+    const containerName = getContainerName(nodeName);
+    await updateNode(nodeName, { containerId, containerName, status: 'running' });
 
     res.json({ 
       message: `Node ${nodeName} started`,
@@ -227,6 +230,7 @@ router.post('/:id/start', async (req: Request, res: Response) => {
         ...node,
         status: 'running',
         containerId,
+        containerName,
       },
     });
   } catch (error: any) {

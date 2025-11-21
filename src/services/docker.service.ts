@@ -4,7 +4,7 @@ import { config, getNodeDataDir } from '../config';
 
 const docker = new Docker();
 
-const CONTAINER_NAME_PREFIX = 'edge-node-';
+const CONTAINER_NAME_PREFIX = 'edge-';
 
 export function getContainerName(nodeName: string): string {
   return `${CONTAINER_NAME_PREFIX}${nodeName}`;

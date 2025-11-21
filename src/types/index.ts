@@ -2,6 +2,7 @@ export interface NodeMetadata {
   name: string;
   port: number;
   containerId?: string;
+  containerName?: string;
   status: 'running' | 'stopped' | 'unknown';
   keystorePath: string;
   createdAt: string;
