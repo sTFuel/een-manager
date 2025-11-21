@@ -120,21 +120,33 @@ export async function startContainer(nodeName: string, port: number): Promise<st
   const nodeDataDir = getNodeDataDir(nodeName);
 
   try {
+    // Calculate ports for 15888, 17888, 17935
+    // Port 17888 is the main port (passed as parameter)
+    // Port 15888 is 2000 less than 17888
+    // Port 17935 is 47 more than 17888
+    const port15888 = port - 2000;
+    const port17935 = port + 47;
+
     const container = await docker.createContainer({
       Image: config.dockerImage,
       name: containerName,
       ExposedPorts: {
+        '15888/tcp': {},
         '17888/tcp': {},
+        '17935/tcp': {},
       },
       Env: [
-        `EDGENODE_PASSWORD=${config.edgenodePassword}`,
+        `EDGELAUNCHER_CONFIG_PATH=/edgelauncher/data/mainnet`,
+        `PASSWORD=${config.password}`,
       ],
       HostConfig: {
         PortBindings: {
+          '15888/tcp': [{ HostPort: port15888.toString() }],
           '17888/tcp': [{ HostPort: port.toString() }],
+          '17935/tcp': [{ HostPort: port17935.toString() }],
         },
         Binds: [
-          `${nodeDataDir}:/root/.edgelauncher`,
+          `${nodeDataDir}:/edgelauncher/data/mainnet`,
         ],
       },
       Labels: {
