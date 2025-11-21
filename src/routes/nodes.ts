@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getAllNodes, getNode, createNode, updateNode } from '../services/metadata.service';
+import { getAllNodes, getNode, createNode, updateNode, deleteNode } from '../services/metadata.service';
 import { 
   getContainerStatus, 
   startContainer, 
@@ -130,8 +130,8 @@ router.post('/new', async (req: Request, res: Response) => {
       const containerId = await startContainer(body.name, node.port);
       await updateNode(body.name, { containerId, status: 'running' });
     } catch (error: any) {
-      // If container start fails, node is still created but stopped
-      await updateNode(body.name, { status: 'stopped' });
+      // Rollback: delete node metadata if container creation fails
+      await deleteNode(body.name);
       throw error;
     }
 
@@ -183,7 +183,8 @@ router.post('/new-with-keystore', async (req: Request, res: Response) => {
       const containerId = await startContainer(body.name, node.port);
       await updateNode(body.name, { containerId, status: 'running' });
     } catch (error: any) {
-      await updateNode(body.name, { status: 'stopped' });
+      // Rollback: delete node metadata if container creation fails
+      await deleteNode(body.name);
       throw error;
     }
 

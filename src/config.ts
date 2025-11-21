@@ -9,6 +9,7 @@ export interface Config {
   dataDir: string;
   basePort: number;
   dockerImage: string;
+  edgenodePassword: string;
 }
 
 function getEnv(key: string, defaultValue?: string): string {
@@ -37,6 +38,7 @@ export const config: Config = {
   dataDir: getEnv('DATA_DIR', '/mnt/edgenodes'),
   basePort: getEnvNumber('BASE_PORT', 17888),
   dockerImage: getEnv('DOCKER_IMAGE', 'thetalabsorg/edgelauncher_mainnet:v1.0.0'),
+  edgenodePassword: getEnv('EDGENODE_PASSWORD'),
 };
 
 export function getNodeDataDir(nodeName: string): string {

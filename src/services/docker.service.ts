@@ -83,6 +83,17 @@ export async function getContainerStatus(nodeName: string): Promise<{
   }
 }
 
+async function checkImageExists(imageName: string): Promise<boolean> {
+  try {
+    const images = await docker.listImages();
+    return images.some((img: Docker.ImageInfo) => 
+      img.RepoTags?.some(tag => tag === imageName)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export async function startContainer(nodeName: string, port: number): Promise<string> {
   const container = await getContainer(nodeName);
   
@@ -98,6 +109,12 @@ export async function startContainer(nodeName: string, port: number): Promise<st
     return status.id || '';
   }
 
+  // Check if image exists before creating container
+  const imageExists = await checkImageExists(config.dockerImage);
+  if (!imageExists) {
+    throw new Error(`Docker image ${config.dockerImage} not found. Please pull it first: docker pull ${config.dockerImage}`);
+  }
+
   // Create new container
   const containerName = getContainerName(nodeName);
   const nodeDataDir = getNodeDataDir(nodeName);
@@ -109,6 +126,9 @@ export async function startContainer(nodeName: string, port: number): Promise<st
       ExposedPorts: {
         '17888/tcp': {},
       },
+      Env: [
+        `EDGENODE_PASSWORD=${config.edgenodePassword}`,
+      ],
       HostConfig: {
         PortBindings: {
           '17888/tcp': [{ HostPort: port.toString() }],
