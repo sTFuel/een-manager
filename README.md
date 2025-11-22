@@ -49,10 +49,13 @@ Create a `.env` file with the following variables:
 
 - `API_KEY` (required): API key for authentication
 - `PASSWORD` (required): Password for the edge nodes (used for all nodes)
+- `NETWORK` (optional): Network type - `mainnet` or `testnet` (default: `mainnet`)
 - `PORT` (optional): Server port (default: 3000)
 - `DATA_DIR` (optional): Base directory for node data (default: `/mnt/edgenodes`)
 - `BASE_PORT` (optional): Starting port for nodes (default: 17888)
-- `DOCKER_IMAGE` (optional): Docker image (default: `thetalabsorg/edgelauncher_mainnet:v1.0.0`)
+- `DOCKER_IMAGE` (optional): Docker image (overrides network-based defaults)
+  - Mainnet default: `thetalabsorg/edgelauncher_mainnet:v1.0.0`
+  - Testnet default: `pizajolo/edgecore-testnet:latest`
 
 ## Usage
 

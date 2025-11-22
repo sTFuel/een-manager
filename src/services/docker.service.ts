@@ -127,6 +127,9 @@ export async function startContainer(nodeName: string, port: number): Promise<st
     const port15888 = port - 2000;
     const port17935 = port + 47;
 
+    // Determine config path and volume mount based on network
+    const configPath = `/edgelauncher/data/${config.network}`;
+
     const container = await docker.createContainer({
       Image: config.dockerImage,
       name: containerName,
@@ -136,7 +139,7 @@ export async function startContainer(nodeName: string, port: number): Promise<st
         '17935/tcp': {},
       },
       Env: [
-        `EDGELAUNCHER_CONFIG_PATH=/edgelauncher/data/mainnet`,
+        `EDGELAUNCHER_CONFIG_PATH=${configPath}`,
         `PASSWORD=${config.password}`,
       ],
       HostConfig: {
@@ -146,7 +149,7 @@ export async function startContainer(nodeName: string, port: number): Promise<st
           '17935/tcp': [{ HostPort: port17935.toString() }],
         },
         Binds: [
-          `${nodeDataDir}:/edgelauncher/data/mainnet`,
+          `${nodeDataDir}:${configPath}`,
         ],
       },
       Labels: {

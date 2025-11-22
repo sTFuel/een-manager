@@ -3,6 +3,8 @@ import path from 'path';
 
 dotenv.config();
 
+export type Network = 'mainnet' | 'testnet';
+
 export interface Config {
   apiKey: string;
   port: number;
@@ -10,6 +12,7 @@ export interface Config {
   basePort: number;
   dockerImage: string;
   password: string;
+  network: Network;
 }
 
 function getEnv(key: string, defaultValue?: string): string {
@@ -32,13 +35,37 @@ function getEnvNumber(key: string, defaultValue: number): number {
   return num;
 }
 
+function getNetwork(): Network {
+  const network = getEnv('NETWORK', 'mainnet').toLowerCase();
+  if (network !== 'mainnet' && network !== 'testnet') {
+    throw new Error(`Invalid NETWORK value: ${network}. Must be 'mainnet' or 'testnet'`);
+  }
+  return network as Network;
+}
+
+function getDockerImage(network: Network): string {
+  // If DOCKER_IMAGE is explicitly set, use it
+  const customImage = process.env.DOCKER_IMAGE;
+  if (customImage) {
+    return customImage;
+  }
+  
+  // Otherwise, use default based on network
+  return network === 'testnet' 
+    ? 'pizajolo/edgecore-testnet:latest'
+    : 'thetalabsorg/edgelauncher_mainnet:v1.0.0';
+}
+
+const network = getNetwork();
+
 export const config: Config = {
   apiKey: getEnv('API_KEY'),
   port: getEnvNumber('PORT', 3000),
   dataDir: getEnv('DATA_DIR', '/mnt/edgenodes'),
   basePort: getEnvNumber('BASE_PORT', 17888),
-  dockerImage: getEnv('DOCKER_IMAGE', 'thetalabsorg/edgelauncher_mainnet:v1.0.0'),
   password: getEnv('PASSWORD'),
+  network,
+  dockerImage: getDockerImage(network),
 };
 
 export function getNodeDataDir(nodeName: string): string {
