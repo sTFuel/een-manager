@@ -99,6 +99,11 @@ export async function keystoreExists(nodeName: string): Promise<boolean> {
 
 export async function ensureNodeDataDir(nodeName: string): Promise<void> {
   const nodeDataDir = getNodeDataDir(nodeName);
+  const keystoreDir = getKeystorePath(nodeName);
+  
+  // Ensure both the node data directory and keystore directory structure exist
+  // This is important so the container can write the keystore when it starts
   await fs.mkdir(nodeDataDir, { recursive: true });
+  await fs.mkdir(keystoreDir, { recursive: true });
 }
 
