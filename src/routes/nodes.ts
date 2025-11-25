@@ -14,6 +14,7 @@ import {
   ensureNodeDataDir 
 } from '../services/keystore.service';
 import { CreateNodeRequest, CreateNodeWithKeystoreRequest } from '../types';
+import { getKeystoreRelativePath } from '../config';
 
 const router = Router();
 
@@ -122,7 +123,7 @@ router.post('/new', async (req: Request, res: Response) => {
     await ensureNodeDataDir(body.name);
 
     // Create node metadata
-    const keystorePath = `edgecore/key/encrypted`;
+    const keystorePath = getKeystoreRelativePath();
     const node = await createNode(body.name, keystorePath);
 
     // Start the container (it will generate its own keystore on first run)
@@ -176,7 +177,7 @@ router.post('/new-with-keystore', async (req: Request, res: Response) => {
     await writeKeystoreFromJSON(body.name, body.keystore);
 
     // Create node metadata
-    const keystorePath = `edgecore/key/encrypted`;
+    const keystorePath = getKeystoreRelativePath();
     const node = await createNode(body.name, keystorePath);
 
     // Start the container

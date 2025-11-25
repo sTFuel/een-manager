@@ -76,3 +76,9 @@ export function getMetadataPath(): string {
   return path.join(config.dataDir, 'nodes.json');
 }
 
+export function getKeystoreRelativePath(): string {
+  return config.network === 'testnet'
+    ? 'key/encrypted'
+    : 'edgecore/key/encrypted';
+}
+

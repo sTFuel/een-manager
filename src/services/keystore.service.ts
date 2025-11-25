@@ -1,8 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { getNodeDataDir } from '../config';
+import { getNodeDataDir, getKeystoreRelativePath } from '../config';
 
-const KEYSTORE_RELATIVE_PATH = 'edgecore/key/encrypted';
+const KEYSTORE_RELATIVE_PATH = getKeystoreRelativePath();
 
 export function getKeystorePath(nodeName: string): string {
   const nodeDataDir = getNodeDataDir(nodeName);

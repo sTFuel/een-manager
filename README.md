@@ -56,6 +56,9 @@ Create a `.env` file with the following variables:
 - `DOCKER_IMAGE` (optional): Docker image (overrides network-based defaults)
   - Mainnet default: `thetalabsorg/edgelauncher_mainnet:v1.0.0`
   - Testnet default: `pizajolo/edgecore-testnet:latest`
+- Keystore path in metadata reflects the active network:
+  - Mainnet: `edgecore/key/encrypted`
+  - Testnet: `key/encrypted`
 
 ## Usage
 
