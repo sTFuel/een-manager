@@ -2,7 +2,8 @@
 import axios from 'axios';
 import { config } from '../config';
 import { readKeystore } from './keystore.service';
-import { Wallet, transactions } from '@thetalabs/theta-js';
+import * as thetajs from '@thetalabs/theta-js';
+const { transactions } = thetajs;
 const { StakeRewardDistributionTransaction } = transactions;
 // @ts-ignore - eth-lib may not have full TypeScript definitions
 import RLP from 'eth-lib/lib/rlp';
@@ -145,9 +146,9 @@ export async function executeStakeRewardDistribution(
   const keystoreJson = JSON.parse(keystoreBuffer.toString('utf-8'));
 
   // Decrypt keystore using password from config
-  let wallet: Wallet;
+  let wallet: thetajs.Wallet;
   try {
-    wallet = Wallet.fromV3Keystore(keystoreJson, config.password);
+    wallet = await thetajs.Wallet.fromEncryptedJson(keystoreJson, config.password);
   } catch (error: any) {
     throw new Error(`Failed to decrypt keystore: ${error.message}`);
   }
@@ -177,7 +178,7 @@ export async function executeStakeRewardDistribution(
   // Sign transaction
   const chainID = config.thetaChainId.toString();
   const signBytes = tx.signBytes(chainID);
-  const signature = Wallet.sign(signBytes, privateKey);
+  const signature = thetajs.Wallet.sign(signBytes, privateKey);
   tx.setSignature(signature);
 
   // Serialize the signed transaction for broadcasting
