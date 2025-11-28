@@ -162,23 +162,23 @@ export async function executeStakeRewardDistribution(
   const rawBytes = transactions.serialize(tx, signature);
   const rawBytesHex = rawBytes.startsWith('0x') ? rawBytes : '0x' + rawBytes;
 
-  // Broadcast (correct RPC)
-  const response = await fetch(config.thetaRpcUrl, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'theta.BroadcastRawTransaction',
-      params: [rawBytesHex]   // <-- correct
-    })
+  // Broadcast transaction
+  // theta.BroadcastRawTransaction expects an object parameter, not an array
+  const response = await axios.post<RPCResponse>(config.thetaRpcUrl, {
+    jsonrpc: '2.0',
+    method: 'theta.BroadcastRawTransaction',
+    params: { tx_bytes: rawBytesHex },
+    id: 1,
   });
 
-  const result = await response.json() as RPCResponse;
-  if (result.error) {
-    throw new Error(result.error.message || 'RPC error');
+  if (response.data.error) {
+    throw new Error(`RPC error: ${response.data.error.message}`);
   }
-  
-  return result.result;
+
+  if (!response.data.result) {
+    throw new Error('No transaction hash from RPC');
+  }
+
+  return response.data.result;
 }
 
