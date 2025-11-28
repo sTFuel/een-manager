@@ -143,14 +143,21 @@ export async function executeStakeRewardDistribution(
 
   // Load keystore file
   const keystoreBuffer = await readKeystore(nodeName);
-  const keystoreJson = JSON.parse(keystoreBuffer.toString('utf-8'));
+  let keystoreJson = JSON.parse(keystoreBuffer.toString('utf-8'));
+
+  // Ensure address has 0x prefix (required by ethers.js)
+  if (keystoreJson.address && !keystoreJson.address.startsWith('0x')) {
+    keystoreJson = {
+      ...keystoreJson,
+      address: '0x' + keystoreJson.address,
+    };
+  }
 
   // Decrypt keystore using password from config
   let wallet: thetajs.Wallet;
   try {
     wallet = await thetajs.Wallet.fromEncryptedJson(keystoreJson, config.password);
   } catch (error: any) {
-    console.log(keystoreJson)
     throw new Error(`Failed to decrypt keystore: ${error.message}`);
   }
 
