@@ -5,10 +5,6 @@ import { readKeystore } from './keystore.service';
 import * as thetajs from '@thetalabs/theta-js';
 const { transactions } = thetajs;
 const { StakeRewardDistributionTransaction } = transactions;
-// @ts-ignore - eth-lib may not have full TypeScript definitions
-import RLP from 'eth-lib/lib/rlp';
-// @ts-ignore - eth-lib may not have full TypeScript definitions
-import Bytes from 'eth-lib/lib/bytes';
 
 const MINIMUM_TFUEL_BALANCE = 0.3; // Minimum TFuel required (0.3 TFuel)
 
@@ -174,25 +170,18 @@ export async function executeStakeRewardDistribution(
     sequence,
   });
 
-  // Sign transaction
+  // Sign transaction using Theta JS SDK's sign function
   const chainID = config.thetaChainId.toString();
-  const signBytes = tx.signBytes(chainID);
-  const signature = thetajs.Wallet.sign(signBytes, privateKey);
-  tx.setSignature(signature);
+  const signature = transactions.sign(chainID, tx, privateKey);
 
-  // Serialize the signed transaction for broadcasting
-  // The transaction needs to be RLP encoded with chainID, txType, and signed tx data
-  const encodedChainID = RLP.encode(Bytes.fromString(chainID));
-  const encodedTxType = RLP.encode(Bytes.fromNumber(tx.getType()));
-  // After setting signature, rlpInput() includes the signature
-  const encodedTx = RLP.encode(tx.rlpInput());
-  
-  // Combine chainID, txType, and tx data (remove 0x prefix from encoded values)
-  const rawTx = encodedChainID.slice(2) + encodedTxType.slice(2) + encodedTx.slice(2);
-  const signedTx = '0x' + rawTx;
+  // Serialize the transaction using Theta JS SDK's serialize function
+  const rawBytes = transactions.serialize(tx, signature);
+
+  // Add 0x prefix if not present
+  const rawBytesHex = rawBytes.startsWith('0x') ? rawBytes : '0x' + rawBytes;
 
   // Broadcast transaction
-  const txHash = await broadcastTransaction(signedTx);
+  const txHash = await broadcastTransaction(rawBytesHex);
 
   return txHash;
 }

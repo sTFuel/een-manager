@@ -7,6 +7,8 @@ declare module '@thetalabs/theta-js' {
   }
 
   export namespace transactions {
+    export function sign(chainID: string, tx: any, privateKey: string): string;
+    export function serialize(tx: any, signature: string): string;
     export class StakeRewardDistributionTransaction {
       constructor(tx: {
         holder: string;
