@@ -13,7 +13,8 @@ import {
   keystoreExists,
   ensureNodeDataDir 
 } from '../services/keystore.service';
-import { CreateNodeRequest, CreateNodeWithKeystoreRequest } from '../types';
+import { CreateNodeRequest, CreateNodeWithKeystoreRequest, StakeRewardDistributionRequest } from '../types';
+import { executeStakeRewardDistribution } from '../services/transaction.service';
 import { getKeystoreRelativePath } from '../config';
 
 const router = Router();
@@ -269,6 +270,63 @@ router.post('/:id/stop', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /nodes/:id/stake-reward-distribution - Execute stake reward distribution transaction
+router.post('/:id/stake-reward-distribution', async (req: Request, res: Response) => {
+  try {
+    const nodeName = req.params.id;
+    const body: StakeRewardDistributionRequest = req.body;
+
+    // Validate node exists
+    const node = await getNode(nodeName);
+    if (!node) {
+      res.status(404).json({ error: `Node ${nodeName} not found` });
+      return;
+    }
+
+    // Validate request body
+    if (!body.rewardWallet || typeof body.rewardWallet !== 'string') {
+      res.status(400).json({ error: 'rewardWallet is required and must be a string' });
+      return;
+    }
+
+    if (typeof body.splitFee !== 'number' || body.splitFee < 0 || body.splitFee > 1000) {
+      res.status(400).json({ error: 'splitFee must be a number between 0 and 1000' });
+      return;
+    }
+
+    // Validate rewardWallet address format
+    if (!/^0x[a-fA-F0-9]{40}$/.test(body.rewardWallet)) {
+      res.status(400).json({ error: 'Invalid rewardWallet address format' });
+      return;
+    }
+
+    // Execute transaction
+    try {
+      const transactionHash = await executeStakeRewardDistribution(
+        nodeName,
+        body.rewardWallet,
+        body.splitFee
+      );
+
+      res.json({
+        success: true,
+        transactionHash,
+        message: `Stake reward distribution transaction submitted for node ${nodeName}`,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  } catch (error: any) {
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
   }
 });
 

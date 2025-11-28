@@ -13,6 +13,8 @@ export interface Config {
   dockerImage: string;
   password: string;
   network: Network;
+  thetaRpcUrl: string;
+  thetaChainId: number;
 }
 
 function getEnv(key: string, defaultValue?: string): string {
@@ -56,6 +58,33 @@ function getDockerImage(network: Network): string {
     : 'thetalabsorg/edgelauncher_mainnet:v1.0.0';
 }
 
+function getThetaRpcUrl(network: Network): string {
+  // If THETA_RPC_URL is explicitly set, use it
+  const customRpcUrl = process.env.THETA_RPC_URL;
+  if (customRpcUrl) {
+    return customRpcUrl;
+  }
+  
+  // Otherwise, use default based on network
+  return network === 'testnet'
+    ? 'https://eth-rpc-api-testnet.thetatoken.org/rpc'
+    : 'https://eth-rpc-api.thetatoken.org/rpc';
+}
+
+function getThetaChainId(network: Network): number {
+  // If THETA_CHAIN_ID is explicitly set, use it
+  const customChainId = process.env.THETA_CHAIN_ID;
+  if (customChainId) {
+    const chainId = parseInt(customChainId, 10);
+    if (!isNaN(chainId)) {
+      return chainId;
+    }
+  }
+  
+  // Otherwise, use default based on network
+  return network === 'testnet' ? 365 : 361;
+}
+
 const network = getNetwork();
 
 export const config: Config = {
@@ -66,6 +95,8 @@ export const config: Config = {
   password: getEnv('PASSWORD'),
   network,
   dockerImage: getDockerImage(network),
+  thetaRpcUrl: getThetaRpcUrl(network),
+  thetaChainId: getThetaChainId(network),
 };
 
 export function getNodeDataDir(nodeName: string): string {

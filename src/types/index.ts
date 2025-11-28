@@ -46,3 +46,8 @@ export interface CreateNodeWithKeystoreRequest {
   keystore: object; // JSON keystore object
 }
 
+export interface StakeRewardDistributionRequest {
+  rewardWallet: string;
+  splitFee: number; // 0-1000
+}
+
