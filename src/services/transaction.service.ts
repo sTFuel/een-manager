@@ -2,8 +2,8 @@
 import axios from 'axios';
 import { config } from '../config';
 import { readKeystore } from './keystore.service';
-import { Wallet } from '@thetalabs/theta-js';
-import StakeRewardDistributionTransaction from '@thetalabs/theta-js/lib/transaction/StakeRewardDistributionTransaction';
+import { Wallet, transactions } from '@thetalabs/theta-js';
+const { StakeRewardDistributionTransaction } = transactions;
 // @ts-ignore - eth-lib may not have full TypeScript definitions
 import RLP from 'eth-lib/lib/rlp';
 // @ts-ignore - eth-lib may not have full TypeScript definitions
