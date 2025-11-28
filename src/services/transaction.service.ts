@@ -153,7 +153,7 @@ export async function executeStakeRewardDistribution(
   }
 
   const nodeAddress = wallet.getAddress();
-  const privateKey = wallet.getPrivateKey();
+  const privateKey = wallet.privateKey;
 
   // Check TFuel balance
   const balance = await checkTFuelBalance(nodeAddress);

@@ -3,7 +3,7 @@ declare module '@thetalabs/theta-js' {
     static fromEncryptedJson(keystore: any, password: string): Promise<Wallet>;
     static sign(message: string, privateKey: string): string;
     getAddress(): string;
-    getPrivateKey(): string;
+    privateKey: string;
   }
 
   export namespace transactions {
