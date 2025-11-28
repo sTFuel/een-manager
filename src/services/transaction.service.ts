@@ -154,6 +154,9 @@ export async function executeStakeRewardDistribution(
     sequence,
   });
 
+  // FIX THETA SDK BUG:
+  tx.getType = () => 11;
+
   // Sign transaction
   const chainID = config.thetaChainId.toString();
   const signature = transactions.sign(chainID, tx, privateKey);
