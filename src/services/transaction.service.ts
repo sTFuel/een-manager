@@ -91,35 +91,6 @@ async function getSequence(address: string): Promise<number> {
 }
 
 /**
- * Broadcast a signed transaction to the network
- */
-async function broadcastTransaction(signedTx: string): Promise<string> {
-  try {
-    const response = await axios.post<RPCResponse>(config.thetaRpcUrl, {
-      jsonrpc: '2.0',
-      method: 'theta.BroadcastRawTransaction',
-      params: [signedTx],
-      id: 1,
-    });
-
-    if (response.data.error) {
-      throw new Error(`RPC error: ${response.data.error.message}`);
-    }
-
-    if (!response.data.result) {
-      throw new Error('No transaction hash from RPC');
-    }
-
-    return response.data.result;
-  } catch (error: any) {
-    if (error.response?.data?.error) {
-      throw new Error(`RPC error: ${error.response.data.error.message}`);
-    }
-    throw new Error(`Failed to broadcast transaction: ${error.message}`);
-  }
-}
-
-/**
  * Execute StakeRewardDistributionTransaction for a node
  */
 export async function executeStakeRewardDistribution(
@@ -184,7 +155,7 @@ export async function executeStakeRewardDistribution(
   const response = await fetch(config.thetaRpcUrl, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'theta.BroadcastRawTransaction', params: [{ tx_bytes: rawBytesHex }] })
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'theta.BroadcastRawTransaction', params: [rawBytesHex] })
   });
 
   const result = await response.json() as RPCResponse;
