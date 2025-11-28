@@ -20,6 +20,10 @@ interface RPCResponse {
 
 interface AccountResult {
   sequence?: string | number;
+  coins?: {
+    thetawei?: string;
+    tfuelwei?: string;
+  };
   [key: string]: any;
 }
 
@@ -30,8 +34,8 @@ export async function checkTFuelBalance(address: string): Promise<number> {
   try {
     const response = await axios.post<RPCResponse>(config.thetaRpcUrl, {
       jsonrpc: '2.0',
-      method: 'eth_getBalance',
-      params: [address, 'latest'],
+      method: 'theta.GetAccount',
+      params: [{ address }],
       id: 1,
     });
 
@@ -40,12 +44,21 @@ export async function checkTFuelBalance(address: string): Promise<number> {
     }
 
     if (!response.data.result) {
-      throw new Error('No balance result from RPC');
+      throw new Error('No account result from RPC');
     }
 
-    // Convert from wei (hex string) to TFuel (number)
-    const balanceWei = BigInt(response.data.result);
-    const balanceTFuel = Number(balanceWei) / 1e18; // 1 TFuel = 10^18 wei
+    const account = response.data.result as AccountResult;
+    const tfuelwei = account.coins?.tfuelwei;
+
+    if (!tfuelwei) {
+      // Account might not exist or have no balance
+      return 0;
+    }
+
+    // Convert from tfuelwei (string) to TFuel (number)
+    // 1 TFuel = 10^18 wei
+    const balanceWei = BigInt(tfuelwei);
+    const balanceTFuel = Number(balanceWei) / 1e18;
 
     return balanceTFuel;
   } catch (error: any) {
