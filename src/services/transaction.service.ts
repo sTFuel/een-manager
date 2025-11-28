@@ -150,8 +150,6 @@ export async function executeStakeRewardDistribution(
   const rawBytesHex = rawBytes.startsWith('0x') ? rawBytes : '0x' + rawBytes;
 
   // Broadcast (correct RPC)
-  console.log(config.thetaRpcUrl);
-  console.log(rawBytesHex);
   const response = await fetch(config.thetaRpcUrl, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

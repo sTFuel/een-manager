@@ -67,8 +67,8 @@ function getThetaRpcUrl(network: Network): string {
   
   // Otherwise, use default based on network
   return network === 'testnet'
-    ? 'https://eth-rpc-api-testnet.thetatoken.org/rpc'
-    : 'https://eth-rpc-api.thetatoken.org/rpc';
+    ? 'https://theta-bridge-rpc-testnet.thetatoken.org/rpc'
+    : 'https://theta-bridge-rpc.thetatoken.org/rpc';
 }
 
 function getThetaChainId(network: Network): number {
