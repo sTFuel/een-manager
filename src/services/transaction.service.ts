@@ -141,21 +141,24 @@ export async function executeStakeRewardDistribution(
     sequence,
   });
 
-  // Sign transaction using Theta JS SDK's sign function
+  // Sign transaction
   const chainID = config.thetaChainId.toString();
   const signature = transactions.sign(chainID, tx, privateKey);
 
-  // Serialize the transaction using Theta JS SDK's serialize function
+  // Serialize
   const rawBytes = transactions.serialize(tx, signature);
-
-  // Add 0x prefix if not present
   const rawBytesHex = rawBytes.startsWith('0x') ? rawBytes : '0x' + rawBytes;
 
-  // Broadcast transaction
+  // Broadcast (correct RPC)
   const response = await fetch(config.thetaRpcUrl, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'theta.BroadcastRawTransaction', params: [rawBytesHex] })
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'theta.BroadcastRawTransaction',
+      params: [rawBytesHex]   // <-- correct
+    })
   });
 
   const result = await response.json() as RPCResponse;
