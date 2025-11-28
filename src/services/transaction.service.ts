@@ -181,8 +181,17 @@ export async function executeStakeRewardDistribution(
   const rawBytesHex = rawBytes.startsWith('0x') ? rawBytes : '0x' + rawBytes;
 
   // Broadcast transaction
-  const txHash = await broadcastTransaction(rawBytesHex);
+  const response = await fetch(config.thetaRpcUrl, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'theta.BroadcastRawTransaction', params: [{ tx_bytes: rawBytesHex }] })
+  });
 
-  return txHash;
+  const result = await response.json() as RPCResponse;
+  if (result.error) {
+    throw new Error(result.error.message || 'RPC error');
+  }
+  
+  return result.result;
 }
 
