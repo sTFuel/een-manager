@@ -1,8 +1,8 @@
+/// <reference path="../types/thetajs.d.ts" />
 import axios from 'axios';
 import { config } from '../config';
 import { readKeystore } from './keystore.service';
 import { Wallet } from '@thetalabs/theta-js';
-// @ts-ignore - @thetalabs/theta-js may not have full TypeScript definitions
 import StakeRewardDistributionTransaction from '@thetalabs/theta-js/lib/transaction/StakeRewardDistributionTransaction';
 // @ts-ignore - eth-lib may not have full TypeScript definitions
 import RLP from 'eth-lib/lib/rlp';
