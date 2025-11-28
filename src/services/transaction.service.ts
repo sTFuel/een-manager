@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { config } from '../config';
 import { readKeystore } from './keystore.service';
-import { Wallet } from 'thetajs';
-// @ts-ignore - thetajs may not have full TypeScript definitions
-import StakeRewardDistributionTransaction from 'thetajs/lib/transaction/StakeRewardDistributionTransaction';
+import { Wallet } from '@thetalabs/theta-js';
+// @ts-ignore - @thetalabs/theta-js may not have full TypeScript definitions
+import StakeRewardDistributionTransaction from '@thetalabs/theta-js/lib/transaction/StakeRewardDistributionTransaction';
 // @ts-ignore - eth-lib may not have full TypeScript definitions
 import RLP from 'eth-lib/lib/rlp';
 // @ts-ignore - eth-lib may not have full TypeScript definitions
@@ -13,12 +13,17 @@ const MINIMUM_TFUEL_BALANCE = 0.3; // Minimum TFuel required (0.3 TFuel)
 
 interface RPCResponse {
   jsonrpc: string;
-  result?: string;
+  result?: string | any;
   error?: {
     code: number;
     message: string;
   };
   id: number;
+}
+
+interface AccountResult {
+  sequence?: string | number;
+  [key: string]: any;
 }
 
 /**
@@ -74,8 +79,14 @@ async function getSequence(address: string): Promise<number> {
       return 1; // Default to 1 if account doesn't exist
     }
 
-    const account = response.data.result;
-    return account.sequence ? parseInt(account.sequence, 10) + 1 : 1;
+    const account = response.data.result as AccountResult;
+    if (account.sequence) {
+      const seq = typeof account.sequence === 'string' 
+        ? parseInt(account.sequence, 10) 
+        : account.sequence;
+      return seq + 1;
+    }
+    return 1;
   } catch (error: any) {
     // If account doesn't exist or error, default to sequence 1
     return 1;
