@@ -150,6 +150,7 @@ export async function executeStakeRewardDistribution(
   try {
     wallet = await thetajs.Wallet.fromEncryptedJson(keystoreJson, config.password);
   } catch (error: any) {
+    console.log(keystoreJson)
     throw new Error(`Failed to decrypt keystore: ${error.message}`);
   }
 
