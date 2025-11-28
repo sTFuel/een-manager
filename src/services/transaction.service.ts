@@ -158,7 +158,7 @@ export async function executeStakeRewardDistribution(
   tx.getType = () => 11;
 
   // Sign transaction
-  const chainID = config.thetaChainId.toString();
+  const chainID = config.network.toString();
   const signature = transactions.sign(chainID, tx, privateKey);
 
   // Serialize
