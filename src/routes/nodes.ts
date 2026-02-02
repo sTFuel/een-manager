@@ -11,7 +11,8 @@ import {
   readKeystore, 
   writeKeystoreFromJSON, 
   keystoreExists,
-  ensureNodeDataDir 
+  ensureNodeDataDir,
+  getKeystoreAddress
 } from '../services/keystore.service';
 import { CreateNodeRequest, CreateNodeWithKeystoreRequest, StakeRewardDistributionRequest } from '../types';
 import { executeStakeRewardDistribution } from '../services/transaction.service';
@@ -59,8 +60,37 @@ router.get('/:id/status', async (req: Request, res: Response) => {
     if (containerStatus.running && containerStatus.port) {
       try {
         rpcInfo = await nodeService.getNodeInfo(containerStatus.port);
+        
+        // If RPC didn't return an address, try to get it from the keystore
+        if (!rpcInfo.address && !rpcInfo.error) {
+          try {
+            const keystoreAddress = await getKeystoreAddress(nodeName);
+            rpcInfo.address = keystoreAddress;
+          } catch (error: any) {
+            // If keystore read fails, just log it but don't fail the request
+            console.warn(`Could not get address from keystore for node ${nodeName}: ${error.message}`);
+          }
+        }
       } catch (error: any) {
         rpcInfo = { error: error.message };
+        
+        // Try to get address from keystore as fallback
+        try {
+          const keystoreAddress = await getKeystoreAddress(nodeName);
+          rpcInfo.address = keystoreAddress;
+        } catch (keystoreError: any) {
+          // If both RPC and keystore fail, just include the RPC error
+          console.warn(`Could not get address from keystore for node ${nodeName}: ${keystoreError.message}`);
+        }
+      }
+    } else {
+      // Container not running, try to get address from keystore
+      try {
+        const keystoreAddress = await getKeystoreAddress(nodeName);
+        rpcInfo.address = keystoreAddress;
+      } catch (error: any) {
+        // If keystore read fails, that's okay - node might not have keystore yet
+        console.warn(`Could not get address from keystore for node ${nodeName}: ${error.message}`);
       }
     }
 
